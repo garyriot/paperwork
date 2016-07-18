@@ -11,9 +11,18 @@ RUN apt-get update && \
  DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
  DEBIAN_FRONTEND=noninteractive apt-get -y install supervisor pwgen && \
  apt-get -y install mysql-server mysql-client libmcrypt4 php5-mcrypt php5-json php5-curl \
- php5-ldap php5-cli nodejs nodejs-legacy npm git wget git-core
+ php5-ldap php5-cli nodejs nodejs-legacy npm git git-core
  # curl apache2 libapache2-mod-php5 php5-mysql php5-pgsql php5-gd \
  # php-pear php5-fpm php-apc
+
+# Install composer
+ # RUN cd /tmp && \
+ #  curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin && \
+ #  mv /usr/local/bin/composer.phar /usr/local/bin/composer
+
+# Override default PHP conf 
+# RUN echo "extension=mcrypt.so" >> /etc/php5/fpm/php.ini && \
+#     echo "extension=mcrypt.so" >> /etc/php5/cli/php.ini
 
 #Fetch the latest Paperwork code
 #RUN mkdir -p /opt /config/databases /app
@@ -23,11 +32,8 @@ RUN cd /tmp && \
  cp /tmp/paperwork/frontend/deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf  && \
  cp -r * /app
 
-# Start mysql
-#RUN /etc/init.d/mysqld start 
-
 # Override default apache conf
-# ADD    paperwork/frontend/deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf
+#ADD ./deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf
 
 # Enable apache rewrite module
 # Enable php mcrypt module
@@ -36,7 +42,7 @@ RUN a2enmod rewrite && php5enmod mcrypt && \
     mkdir -p /app && rm -rf /var/www/html && ln -s /app/public /var/www/html
 
 # Copy application + install dependencies
-# ADD paperwork/frontend /app
+ADD . /app
 WORKDIR /app
 
 RUN \
@@ -44,13 +50,8 @@ RUN \
     find ./app/storage -type d -print0 | xargs -0 chmod 0755 && \
     find ./app/storage -type f -print0 | xargs -0 chmod 0644 && \
     # Install dependencies and build the scripts and styles
-    composer self-update && \
-   composer install && \
-    wget https://www.npmjs.org/install.sh && \
-    bash ./install.sh && \
-    npm install -g gulp && \
-    npm install && \
-    gulp && \
+    composer install && npm update && npm install && \
+    npm install -g gulp bower && bower --allow-root install && gulp && \
     # Fix permissions for apache \
     chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
 
