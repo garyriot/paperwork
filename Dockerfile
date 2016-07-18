@@ -11,7 +11,7 @@ RUN apt-get update && \
  DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
  DEBIAN_FRONTEND=noninteractive apt-get -y install supervisor pwgen && \
  apt-get -y install mysql-server mysql-client libmcrypt4 php5-mcrypt php5-json php5-curl \
- php5-ldap php5-cli nodejs nodejs-legacy npm git git-core
+ php5-ldap php5-cli nodejs nodejs-legacy npm git wget git-core
  # curl apache2 libapache2-mod-php5 php5-mysql php5-pgsql php5-gd \
  # php-pear php5-fpm php-apc
 
