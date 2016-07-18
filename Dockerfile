@@ -15,17 +15,19 @@ RUN apt-get update && \
  # curl apache2 libapache2-mod-php5 php5-mysql php5-pgsql php5-gd \
  # php-pear php5-fpm php-apc
 
-# Install composer
- # RUN cd /tmp && \
- #  curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin && \
- #  mv /usr/local/bin/composer.phar /usr/local/bin/composer
+#Fetch the latest Paperwork code
+#RUN mkdir -p /opt /config/databases /app
+RUN cd /tmp && \
+ git clone https://github.com/twostairs/paperwork.git && \
+ cd /tmp/paperwork/frontend && \
+ cp /tmp/paperwork/frontend/deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf  && \
+ cp -r * /app
 
-# Override default PHP conf 
-# RUN echo "extension=mcrypt.so" >> /etc/php5/fpm/php.ini && \
-#     echo "extension=mcrypt.so" >> /etc/php5/cli/php.ini
+# Start mysql
+#RUN /etc/init.d/mysqld start 
 
 # Override default apache conf
-ADD ./deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf
+# ADD    paperwork/frontend/deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf
 
 # Enable apache rewrite module
 # Enable php mcrypt module
@@ -34,7 +36,7 @@ RUN a2enmod rewrite && php5enmod mcrypt && \
     mkdir -p /app && rm -rf /var/www/html && ln -s /app/public /var/www/html
 
 # Copy application + install dependencies
-ADD . /app
+# ADD paperwork/frontend /app
 WORKDIR /app
 
 RUN \
@@ -42,7 +44,8 @@ RUN \
     find ./app/storage -type d -print0 | xargs -0 chmod 0755 && \
     find ./app/storage -type f -print0 | xargs -0 chmod 0644 && \
     # Install dependencies and build the scripts and styles
-    composer install    && \
+    composer self-update && \
+   composer install && \
     wget https://www.npmjs.org/install.sh && \
     bash ./install.sh && \
     npm install -g gulp && \
