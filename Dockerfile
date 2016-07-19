@@ -2,15 +2,14 @@
 #Paperwork is written in PHP, utilising the beautiful Laravel 4 framework. It provides a modern web UI, #built on top of AngularJS & Bootstrap 3, as well as an open API for third party integration.
 #For the back-end part a MySQL database stores everything. With such common requirements (Linux, Apache, #MySQL, PHP), Paperwork will be able to run not only on dedicated servers, but also on small to mid-size NAS #devices (Synology ®, QNAP ®, etc.).
 
-#FROM ubuntu:trusty
 FROM centurylink/apache-php:latest
 MAINTAINER Gary Guo  <garyriot@gmail.com>
 
 # Install packages
 RUN apt-get update && \
  DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
- DEBIAN_FRONTEND=noninteractive apt-get -y install supervisor pwgen && \
- apt-get -y install mysql-client libmcrypt4 php5-mcrypt php5-json php5-curl \
+ #DEBIAN_FRONTEND=noninteractive apt-get -y install supervisor pwgen && \
+ apt-get -y install mysql-server mysql-client libmcrypt4 php5-mcrypt php5-json php5-curl \
  php5-ldap php5-cli nodejs nodejs-legacy npm git git-core
 
 #Fetch the latest Paperwork code
@@ -23,14 +22,11 @@ RUN cd /tmp && \
 # Override default apache conf
 ##ADD ./deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf
 
-# Enable apache rewrite module
-# Enable php mcrypt module
 # Configure /app folder
 RUN a2enmod rewrite && php5enmod mcrypt && \
     mkdir -p /app && rm -rf /var/www/html && ln -s /app/public /var/www/html
 
 # Copy application + install dependencies
-## ADD . /app
 WORKDIR /app
 
 RUN \
@@ -40,7 +36,6 @@ RUN \
     # Install dependencies and build the scripts and styles
     composer install && npm update  && \
     npm install -g gulp && npm install  && \
-    ##npm install -g gulp bower && bower --allow-root install && gulp && \
     # Fix permissions for apache \
     chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
 
