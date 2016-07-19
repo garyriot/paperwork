@@ -43,7 +43,7 @@ RUN \
 RUN sed -i 's/return $app;//' /app/bootstrap/start.php
 RUN echo '$env = $app->detectEnvironment(function() { return "development"; }); return $app;' >> /app/bootstrap/start.php
 
-COPY docker-entrypoint.sh /entrypoint.sh
+ADD docker-entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 #CMD ["/app/docker-runner.sh"]
