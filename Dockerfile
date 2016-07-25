@@ -10,7 +10,7 @@ RUN apt-get update && \
  DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
  #DEBIAN_FRONTEND=noninteractive apt-get -y install supervisor pwgen && \
  apt-get -y install mysql-server mysql-client libmcrypt4 php5-mcrypt php5-json php5-curl \
- php5-ldap php5-cli nodejs nodejs-legacy npm git git-core
+ php5-ldap php5-cli nodejs nodejs-legacy npm git git-core openssh-server openssh-client
 
 #Fetch the latest Paperwork code
 RUN cd /tmp && \
@@ -43,10 +43,10 @@ RUN \
 RUN sed -i 's/return $app;//' /app/bootstrap/start.php
 RUN echo '$env = $app->detectEnvironment(function() { return "development"; }); return $app;' >> /app/bootstrap/start.php
 
-ADD docker-entrypoint.sh /entrypoint.sh
+COPY docker-entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 #CMD ["/app/docker-runner.sh"]
 # VOLUME ["/config"]
 # Clean up APT when done.
- RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ # RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
