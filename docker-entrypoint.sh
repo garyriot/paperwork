@@ -4,6 +4,8 @@
 if [[ ! -e migrated ]]; then
     php artisan migrate
 
+	composer install
+
     touch migrated
 fi
 
