@@ -19,9 +19,15 @@ RUN cd /tmp && \
  cp /tmp/paperwork/frontend/deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf  && \
  cp -r * /app
 
-# Override default apache conf
-##ADD ./deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf
-
+RUN service mysql start &&\  
+    mysql -e "grant all privileges on *.* to 'root'@'%' identified by 'letmein';"&&\  
+    mysql -e "grant all privileges on *.* to 'root'@'localhost' identified by 'letmein';"&&\  
+    mysql -u root -pletmein -e "CREATE DATABASE IF NOT EXISTS paperwork DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;" && \
+    mysql -u root -pletmein -e "CREATE USER 'paperwork'@'localhost' IDENTIFIED BY 'paperwork'" && \
+    mysql -u root -pletmein -e "GRANT ALL PRIVILEGES ON paperwork.* TO 'paperwork'@'localhost'"  && \
+    mysql -u root -pletmein -e "FLUSH PRIVILEGES" && \
+    mysql -u root -pletmein -e "show databases;" 
+    
 # Configure /app folder
 RUN a2enmod rewrite && php5enmod mcrypt && \
     mkdir -p /app && rm -rf /var/www/html && ln -s /app/public /var/www/html
@@ -39,6 +45,8 @@ RUN \
     # Fix permissions for apache \
     chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
 
+#RUN chmod -R 777 /app/app/storage/logs/
+
 # Override environment to ensure laravel is running migrations.
 RUN sed -i 's/return $app;//' /app/bootstrap/start.php
 RUN echo '$env = $app->detectEnvironment(function() { return "development"; }); return $app;' >> /app/bootstrap/start.php
@@ -47,7 +55,7 @@ COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-#CMD ["/app/docker-runner.sh"]
+# CMD ["/app/docker-runner.sh"]
 # VOLUME ["/config"]
 # Clean up APT when done.
  # RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
