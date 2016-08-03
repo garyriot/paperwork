@@ -52,9 +52,11 @@ RUN \
 RUN sed -i 's/return $app;//' /app/bootstrap/start.php
 RUN echo '$env = $app->detectEnvironment(function() { return "development"; }); return $app;' >> /app/bootstrap/start.php
 
+ADD css /app/public
+ADD js /app/js
 ADD database.json /app/app/storage/config/
-ADD paperwork.json /app/app/storage/config/
-ADD setup.php /app/public/
+#ADD paperwork.json /app/app/storage/config/
+#ADD setup.php /app/public/
 ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
