@@ -45,13 +45,16 @@ RUN \
     # Fix permissions for apache \
     chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
 
+
 #RUN chmod -R 777 /app/app/storage/logs/
 
 # Override environment to ensure laravel is running migrations.
 RUN sed -i 's/return $app;//' /app/bootstrap/start.php
 RUN echo '$env = $app->detectEnvironment(function() { return "development"; }); return $app;' >> /app/bootstrap/start.php
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+ADD database.json /app/storage/config/
+ADD paperwork.json /app/storage/config/
+ADD docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
