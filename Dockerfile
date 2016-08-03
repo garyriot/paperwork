@@ -42,6 +42,7 @@ RUN \
     # Install dependencies and build the scripts and styles
     composer install && npm update  && \
     npm install -g gulp && npm install  && \
+    bower install && gulp  && \
     # Fix permissions for apache \
     chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
 
