@@ -40,9 +40,8 @@ RUN \
     find ./app/storage -type d -print0 | xargs -0 chmod 0755 && \
     find ./app/storage -type f -print0 | xargs -0 chmod 0644 && \
     # Install dependencies and build the scripts and styles
-    composer install && npm update && npm install && \
-    npm install -g gulp bower && bower --allow-root install && gulp && \
-
+    composer install && npm update  && \
+    npm install -g gulp && npm install  && \
     # Fix permissions for apache \
     chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
 
@@ -53,8 +52,8 @@ RUN \
 RUN sed -i 's/return $app;//' /app/bootstrap/start.php
 RUN echo '$env = $app->detectEnvironment(function() { return "development"; }); return $app;' >> /app/bootstrap/start.php
 
-ADD css /app/public
-ADD js /app/js
+ADD ./css /app/public/css/
+ADD ./js /app/public/js/
 ADD database.json /app/app/storage/config/
 #ADD paperwork.json /app/app/storage/config/
 #ADD setup.php /app/public/
