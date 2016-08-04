@@ -40,9 +40,9 @@ RUN \
     find ./app/storage -type d -print0 | xargs -0 chmod 0755 && \
     find ./app/storage -type f -print0 | xargs -0 chmod 0644 && \
     # Install dependencies and build the scripts and styles
-    composer install && npm update  && \
-    npm install -g gulp bower && npm install  && \
-    bower install && gulp  && \
+    composer install && npm update && npm install && \
+    npm install -g gulp bower && bower --allow-root install && gulp && \
+
     # Fix permissions for apache \
     chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
 
