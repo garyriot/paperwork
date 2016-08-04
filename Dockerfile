@@ -41,10 +41,9 @@ RUN \
     find ./app/storage -type f -print0 | xargs -0 chmod 0644 && \
     # Install dependencies and build the scripts and styles
     composer install && npm update  && \
-    npm install -g gulp && npm install  && \
+    npm install -g gulp && npm install  &&  gulp &&\
     # Fix permissions for apache \
     chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
-
 
 #RUN chmod -R 777 /app/app/storage/logs/
 
@@ -55,9 +54,8 @@ RUN echo '$env = $app->detectEnvironment(function() { return "development"; }); 
 ADD ./css /app/public/css/
 ADD ./js /app/public/js/
 ADD database.json /app/app/storage/config/
-#ADD paperwork.json /app/app/storage/config/
-#ADD setup.php /app/public/
 ADD docker-entrypoint.sh /docker-entrypoint.sh
+RUN mv /app/app/js/paperwork-native.js /app/app/js/paperwork-native.min.js
 RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
