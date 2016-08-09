@@ -10,14 +10,14 @@ RUN apt-get update && \
  DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
  #DEBIAN_FRONTEND=noninteractive apt-get -y install supervisor pwgen && \
  apt-get -y install mysql-server mysql-client libmcrypt4 php5-mcrypt php5-json php5-curl \
- php5-ldap php5-cli nodejs nodejs-legacy npm git git-core openssh-server openssh-client
+ php5-ldap php5-cli nodejs nodejs-legacy npm git git-core openssh-server openssh-client wget
 
 #Fetch the latest Paperwork code
-RUN cd /tmp && \
- git clone https://github.com/twostairs/paperwork.git && \
- cd /tmp/paperwork/frontend && \
- cp /tmp/paperwork/frontend/deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf  && \
- cp -r * /app
+#RUN cd /tmp && \
+# git clone https://github.com/twostairs/paperwork.git && \
+# cd /tmp/paperwork/frontend && \
+# cp /tmp/paperwork/frontend/deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf  && \
+# cp -r * /app
 
 RUN service mysql start &&\  
     mysql -e "grant all privileges on *.* to 'root'@'%' identified by 'letmein';"&&\  
@@ -29,21 +29,49 @@ RUN service mysql start &&\
     mysql -u root -pletmein -e "show databases;" 
     
 # Configure /app folder
-RUN a2enmod rewrite && php5enmod mcrypt && \
-    mkdir -p /app && rm -rf /var/www/html && ln -s /app/public /var/www/html
+#RUN a2enmod rewrite && php5enmod mcrypt && \
+#    mkdir -p /app && rm -rf /var/www/html && ln -s /app/public /var/www/html
+
+# Install composer
+RUN cd /tmp && \
+    curl -sS https://getcomposer.org/installer | php && \
+    mv composer.phar /usr/local/bin/composer
 
 # Copy application + install dependencies
 WORKDIR /app
 
-RUN \
+#RUN \
+#   # Install dependencies and build the scripts and stylescd /var/www && \
+#   git clone https://github.com/twostairs/paperwork.git && \
+#   cd ./paperwork/frontend/ && \
+#    # Allow writing access into cache storage
+#   find ./app/storage -type d -print0 | xargs -0 chmod 0755 && \
+#   find ./app/storage -type f -print0 | xargs -0 chmod 0644 && \
+#   composer install && \
+#   wget https://www.npmjs.org/install.sh && \
+#   bash ./install.sh && \
+#   npm install -g gulp && \
+#   npm install && \
+#   gulp && \
+#   chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
+
+RUN cd /app && \
+    git clone https://github.com/twostairs/paperwork.git && \
+    cd ./paperwork/frontend/ && \
+    cp /app/paperwork/frontend/deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf  && \
     # Allow writing access into cache storage
     find ./app/storage -type d -print0 | xargs -0 chmod 0755 && \
     find ./app/storage -type f -print0 | xargs -0 chmod 0644 && \
-    # Install dependencies and build the scripts and styles
-    composer install && npm update  && \
-    npm install -g gulp && npm install  &&  gulp &&\
-    # Fix permissions for apache \
-    chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
+    a2enmod rewrite && php5enmod mcrypt && \
+    mkdir -p /app && rm -rf /var/www/html && ln -s /app/public /var/www/html && \
+    composer install && \
+    wget https://www.npmjs.org/install.sh && \
+    bash ./install.sh && \
+    npm install -g gulp && \
+    npm install && \
+    gulp && \
+    chown -R www-data:www-data /app 
+    #&& chmod +x /app/docker-runner.sh
 
 #RUN chmod -R 777 /app/app/storage/logs/
 
@@ -51,11 +79,11 @@ RUN \
 RUN sed -i 's/return $app;//' /app/bootstrap/start.php
 RUN echo '$env = $app->detectEnvironment(function() { return "development"; }); return $app;' >> /app/bootstrap/start.php
 
-ADD ./css /app/public/css/
-ADD ./js /app/public/js/
+#ADD ./css /app/public/css/
+#ADD ./js /app/public/js/
 ADD database.json /app/app/storage/config/
 ADD docker-entrypoint.sh /docker-entrypoint.sh
-RUN mv /app/app/js/paperwork-native.js /app/app/js/paperwork-native.min.js
+#RUN mv /app/app/js/paperwork-native.js /app/app/js/paperwork-native.min.js
 RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
