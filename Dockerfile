@@ -58,6 +58,7 @@ WORKDIR /app
 RUN cd /app && \
     git clone https://github.com/twostairs/paperwork.git && \
     cd ./paperwork/frontend/ && \
+    cp -r * /app && \
     cp /app/paperwork/frontend/deploy/apache.conf /etc/apache2/sites-enabled/000-default.conf  && \
     # Allow writing access into cache storage
     find ./app/storage -type d -print0 | xargs -0 chmod 0755 && \
@@ -70,8 +71,7 @@ RUN cd /app && \
     npm install -g gulp && \
     npm install && \
     gulp && \
-    chown -R www-data:www-data /app 
-    #&& chmod +x /app/docker-runner.sh
+    chown -R www-data:www-data /app && chmod +x /app/docker-runner.sh
 
 #RUN chmod -R 777 /app/app/storage/logs/
 
